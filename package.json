@@ -24,7 +24,8 @@
   "configs": {
     "directories": {
       "dist": "./dist",
-      "ts": "./src",
+      "ts": "./src/ts",
+      "src": "./src",
       "typings": "./typings"
     }
   },

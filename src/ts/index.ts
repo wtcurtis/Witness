@@ -1,7 +1,7 @@
 /// <reference path="Graph.ts" />
 /// <reference path="Backtrack.ts" />
 /// <reference path="Util.ts" />
-/// <reference path="../typings/main.d.ts" />
+/// <reference path="../../typings/main.d.ts" />
 import _ = require('lodash');
 import {CreateGrid, Node} from "./Graph";
 import {Backtrack} from "./Backtrack";
@@ -40,8 +40,8 @@ function noRejectOf<T>() { return () => false; }
 
 Backtrack<Node<number>>(
     start,
-    noBacktrackOf<number>(),
-    //noRejectOf<number>(),
+    //noBacktrackOf<number>(),
+    noRejectOf<number>(),
     (n: Node<number>[]) => last(n) === end,
     (s: Node<number>[]) => notPresent(s, last(s).Nodes()),
     (s: Node<number>[]) => {

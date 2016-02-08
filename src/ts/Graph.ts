@@ -1,5 +1,5 @@
 ///<reference path="Util.ts"/>
-///<reference path="../typings/main.d.ts" />
+///<reference path="../../typings/main.d.ts" />
 import {assert} from "./Util";
 import _ = require('lodash');
 export class Graph<T> {
