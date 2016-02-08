@@ -1,0 +1,33 @@
+{
+  "name": "witness",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "lodash": "^4.2.1"
+  },
+  "devDependencies": {
+    "typescript": "^1.7.5",
+    "typings": "^0.6.6",
+    "del": "latest",
+    "gulp": "latest",
+    "gulp-typescript": "latest",
+    "gulp-concat": "latest",
+    "gulp-browserify": "latest",
+    "run-sequence": "latest",
+    "browserify": "latest",
+    "vinyl-source-stream": "latest"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "configs": {
+    "directories": {
+      "dist": "./dist",
+      "ts": "./src",
+      "typings": "./typings"
+    }
+  },
+  "author": "",
+  "license": "ISC"
+}

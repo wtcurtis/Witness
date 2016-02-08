@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "sourceMap": true,
+    "noImplicitAny": true,
+    "module": "commonjs"
+  },
+  "files": [
+    "index.ts",
+    "Backtrack.ts",
+    "Graph.ts",
+    "Util.ts"
+  ]
+}
