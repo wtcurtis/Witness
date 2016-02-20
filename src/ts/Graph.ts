@@ -3,7 +3,7 @@
 import {assert} from "./Util";
 import _ = require('lodash');
 export class Graph<T> {
-    private nodes: Node<T>[];
+    public nodes: Node<T>[];
     private edges: [number, number][];
 
     constructor(nodes: T[], edges: [number, number][]) {
@@ -19,8 +19,40 @@ export class Graph<T> {
 
             a.AddNode(b); b.AddNode(a);
         });
+    }
 
-        this.nodes.forEach(n => console.log(n.Data(), n.Nodes().map(n => n.Data()).join(', ')));
+    /**
+     * Does not actually delete the node, just makes it unreachable. This way, the
+     * index numbers don't change.
+     *
+     * @param index
+     * @returns {Graph}
+     * @constructor
+     */
+    DeleteNodeAt(index: number) {
+        this.nodes.forEach(n => n.DeleteEdgeWithIndex(index));
+        this.NodeAt(index).ClearEdges();
+
+        return this;
+    }
+
+    DeleteEdgeFromIndex(from: number, to: number) {
+        return this.DeleteEdgeFrom(this.NodeAt(from), this.NodeAt(to));
+    }
+
+    NodeIsConnected(index: number) {
+        var node = this.NodeAt(index);
+        return node && node.Nodes().length > 0;
+    }
+
+    DeleteEdgeFrom(from: Node<T>, to: Node<T>) {
+        var fromEdgeIndex = _.find(from.Nodes(), n => n.Index() === to.Index());
+        var toEdgeIndex = _.find(to.Nodes(), n => n.Index() === from.Index());
+
+        if(fromEdgeIndex !== -1) from.DeleteEdgeWithIndex(fromEdgeIndex);
+        if(toEdgeIndex !== -1) to.DeleteEdgeWithIndex(toEdgeIndex);
+
+        return this;
     }
 
     NodeAt(index: number) { return this.nodes[index]; }
@@ -28,37 +60,9 @@ export class Graph<T> {
     LastNode() { return this.nodes[this.nodes.length - 1]; }
 
     NodeCount() { return this.nodes.length; }
-
-    WriteIndices(indices: NodeTuple[]) {
-        return indices.map(i => this.NodeAt(i[0]).Data()).join(', ');
-    }
-
-    WriteNodes(nodes: Node<T>[]) {
-        return nodes.map(n => n.Data()).join(', ');
-    }
 }
 
 export type NodeTuple = [number, number];
-
-export function CreateGrid(x: number, y: number) {
-    var n = x * y;
-    var indices = _.range(n);
-
-    var getEdges = (i: number, edges: [number, number][]) => {
-        var row = Math.floor(i / x);
-        var col = i % x;
-
-        if(row < y-1) edges.push([i, i+x]);
-        if(col < x-1) edges.push([i, i+1]);
-
-        return edges;
-    };
-
-    var edges : [number, number][] = [];
-    _.each(indices, i => getEdges(i, edges));
-
-    return new Graph(indices, edges);
-}
 
 export class Node<T> {
     private data: T;
@@ -87,12 +91,6 @@ export class Node<T> {
         return this.extra[key];
     }
 
-    AdjacentAt(index: number) {
-        return this.nodes.length >= index-1
-            ? this.nodes[index]
-            : null;
-    }
-
     Data() { return this.data; }
 
     Nodes() {
@@ -104,4 +102,17 @@ export class Node<T> {
     }
 
     Index() { return this.index; }
+
+    DeleteEdgeWithIndex(index: number) {
+        var children = this.nodes.map(n => n.Index()).join(', ');
+        var toDeleteIndex = _.findIndex(this.nodes, n => n.Index() == index);
+        if(toDeleteIndex === -1) return this;
+
+        this.nodes.splice(toDeleteIndex, 1);
+        return this;
+    }
+
+    ClearEdges() {
+        this.nodes = [];
+    }
 }

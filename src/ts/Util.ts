@@ -37,3 +37,7 @@ export function notPresent<T>(haystack: T[], needles: T[]) {
 
     return result;
 }
+
+export function last<T>(a: T[]) {
+    return a[a.length-1];
+}

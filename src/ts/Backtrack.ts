@@ -9,7 +9,8 @@ export function Backtrack<T>(
     reject: (s: T[]) => boolean,
     accept: (s: T[]) => boolean,
     choices: (s: T[]) => T[],
-    output: (s: T[]) => void
+    output: (s: T[]) => void,
+    onlyFirstSolution: boolean = false
 )
 {
     var bt = function(s: T[]) {
@@ -22,7 +23,8 @@ export function Backtrack<T>(
 
         var moves = choices(s);
         for(var i = 0; i < moves.length; i++) {
-            bt(clonePush(s, moves[i]));
+            var found = bt(clonePush(s, moves[i]));
+            if(onlyFirstSolution && found) return true;
         }
     };
 

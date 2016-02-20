@@ -9,6 +9,9 @@
     "index.ts",
     "Backtrack.ts",
     "Graph.ts",
-    "Util.ts"
+    "Util.ts",
+    "Grid.ts",
+    "Stack.ts",
+    "../../typings/main.d.ts"
   ]
 }
