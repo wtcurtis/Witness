@@ -4,6 +4,7 @@
 import {Grid} from "../core/Grid";
 import {Node} from "../core/Graph";
 import React = require('react');
+import {last} from "../core/Util";
 
 export interface GridRendererProps {
     grid: Grid,
@@ -14,6 +15,8 @@ export interface GridRendererProps {
 
 export class HtmlGridRenderer extends React.Component<GridRendererProps, {}> {
     render() {
+        window['grid' as any] = this.props.grid as any;
+        window['solution' as any] = this.props.solution as any;
         const grid = this.props.grid;
         const solution = this.props.solution;
         const regions = grid.DetermineAllRegions(solution);
@@ -35,9 +38,36 @@ export class HtmlGridRenderer extends React.Component<GridRendererProps, {}> {
         }
 
 
-        return <div className="Grid">
+        return <div tabIndex={0} className="Grid" onKeyDown={this.keyDown.bind(this)}>
             {children}
         </div>;
+    }
+
+    moveSolution(x: number, y: number) {
+        const solution = this.props.solution;
+        const lastEl = last(solution);
+        const grid = this.props.grid;
+
+        var nextIndex = lastEl.Index() + (x + y*grid.X());
+        var nextNode = grid.Graph().NodeAt(nextIndex);
+        if(!lastEl.ConnectedTo(nextIndex)) return;
+
+        const previousIndex = solution.indexOf(nextNode);
+        if(solution.length > 1 && previousIndex === solution.length - 2) {
+            solution.splice(solution.length-1, 1);
+        }
+
+        else if(previousIndex !== -1) return;
+        else solution.push(nextNode);
+
+        this.forceUpdate();
+    }
+
+    keyDown(e: React.KeyboardEvent) {
+        if(e.keyCode === 37) this.moveSolution(-1, 0);
+        if(e.keyCode === 39) this.moveSolution(1, 0);
+        if(e.keyCode === 38) this.moveSolution(0, -1);
+        if(e.keyCode === 40) this.moveSolution(0, 1);
     }
 }
 
@@ -150,24 +180,26 @@ class GridRow extends React.Component<RowProps, {}> {
 class GridCell extends React.Component<CellProps, {}> {
     render() {
         var className = "gridCell";
+        var main = this.props.mainProps;
 
-        if(!this.props.mainProps.grid.CellExists(this.props.x, this.props.y)) {
+        if(!main.grid.CellExists(this.props.x, this.props.y)) {
             className += " dead";
         }
 
         var colors = [
-            'black',
+            null,
             'steelblue',
             'lightsteelblue',
             'green',
             'red',
-            'blue'
+            'blue',
+            'black',
         ];
 
         const style = {
-            width: this.props.mainProps.cellWidth,
-            height: this.props.mainProps.cellWidth,
-            margin: this.props.mainProps.cellMargin,
+            width: main.cellWidth,
+            height: main.cellWidth,
+            margin: main.cellMargin,
             backgroundColor: colors[this.props.region]
         };
 

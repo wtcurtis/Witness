@@ -111,6 +111,14 @@ export class Node<T> {
         return this;
     }
 
+    ConnectedTo(index: number) {
+        for(let i = 0; i < this.nodes.length; i++) {
+            if(index === this.nodes[i].Index()) return true;
+        }
+
+        return false;
+    }
+
     ClearEdges() {
         this.nodes = [];
     }
