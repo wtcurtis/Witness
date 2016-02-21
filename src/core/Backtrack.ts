@@ -13,7 +13,7 @@ export function Backtrack<T>(
     onlyFirstSolution: boolean = false
 )
 {
-    var bt = function(s: T[]) {
+    const bt = function(s: T[]) {
         totalInBt++;
         if(reject(s)) return false;
         if(accept(s)) {
@@ -21,9 +21,9 @@ export function Backtrack<T>(
             return true;
         }
 
-        var moves = choices(s);
-        for(var i = 0; i < moves.length; i++) {
-            var found = bt(clonePush(s, moves[i]));
+        const moves = choices(s);
+        for(let i = 0; i < moves.length; i++) {
+            const found = bt(clonePush(s, moves[i]));
             if(onlyFirstSolution && found) return true;
         }
     };

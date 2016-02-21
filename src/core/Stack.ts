@@ -17,7 +17,7 @@ export class Stack<T> {
     }
 
     pop() {
-        var item = this.arr[--this.index];
+        const item = this.arr[--this.index];
         this.size--;
 
         return item;

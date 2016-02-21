@@ -11,10 +11,10 @@ import {createGridGraph} from "./Grid";
 import {Grid} from "./Grid";
 import {Stack} from "./Stack";
 
-var n = 6;
+const n = 6;
 
-var grid = new Grid(n, n);
-var drawNodes = (n: Node<number>[]) => n.map(n => n.Data()).join(', ');
+const grid = new Grid(n, n);
+const drawNodes = (n: Node<number>[]) => n.map(n => n.Data()).join(', ');
 
 //var logConnected = (from: [number, number], to: [number, number], breakEdges: Node<number>[])  => {
 //    console.log("connected from " + from + " to " + to + ": " + grid.CellsConnected(from[0], from[1], to[0], to[1], breakEdges));

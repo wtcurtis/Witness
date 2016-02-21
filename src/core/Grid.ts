@@ -81,33 +81,51 @@ export class Grid {
         return true;
     }
 
-    CellsConnected(cellAX: number, cellAY: number, cellBX: number, cellBY: number, solution: Node<number>[]) {
-        // stupid bounds checking
-        if(cellAY >= this.cellY || cellAY < 0 || cellAX >= this.cellX || cellAX < 0) return false;
-        if(cellBY >= this.cellY || cellBY < 0 || cellBX >= this.cellX || cellBX < 0) return false;
+    private connectedUp(cellX: number, cellY: number, solution: Node<number>[], regionIndexes: number[]) {
+        if(cellY >= this.cellY-1) return false;
+        if(regionIndexes[cellX + (cellY+1)*this.cellX]) return false;
 
-        // naive connectivity
-        let xDiff = cellBX - cellAX;
-        let yDiff = cellBY - cellAY;
+        return this.connectedVertical(cellX, cellY, solution, 1);
+    }
 
-        // No diagonals
-        if(xDiff && yDiff) return false;
-        if(!xDiff && !yDiff) return false;
+    private connectedDown(cellX: number, cellY: number, solution: Node<number>[], regionIndexes: number[]) {
+        if(cellY <= 0) return false;
+        if(regionIndexes[cellX + (cellY-1)*this.cellX]) return false;
 
-        let firstIndex: number;
-        let secondIndex: number;
-        if(xDiff) {
-            let nodeX = cellAX + (xDiff === 1 ? 1 : 0);
-            firstIndex = nodeX + cellAY * this.x;
-            secondIndex = firstIndex + this.y;
-        } else {
-            let nodeY = cellAY + (yDiff === 1 ? 1 : 0);
-            firstIndex = cellAX + nodeY * this.x;
-            secondIndex = firstIndex + 1;
-        }
+        return this.connectedVertical(cellX, cellY, solution, -1);
+    }
 
-        //console.log('indices: ' + firstIndex + ', ' + secondIndex);
+    private connectedRight(cellX: number, cellY: number, solution: Node<number>[], regionIndexes: number[]) {
+        if(cellX >= this.cellX-1) return false;
+        if(regionIndexes[(cellX + 1) + cellY * this.cellX]) return false;
 
+        return this.connectedHorizontal(cellX, cellY, solution, 1);
+    }
+
+    private connectedLeft(cellX: number, cellY: number, solution: Node<number>[], regionIndexes: number[]) {
+        if(cellX <= 0) return false;
+        if(regionIndexes[(cellX - 1) + cellY * this.cellX]) return false;
+
+        return this.connectedHorizontal(cellX, cellY, solution, -1);
+    }
+
+    private connectedVertical(cellX: number, cellY: number, solution: Node<number>[], direction: number) {
+        const nodeY = cellY + (direction === 1 ? 1 : 0);
+        const firstIndex = cellX + nodeY * this.x;
+        const secondIndex = firstIndex + 1;
+
+        return !Grid.edgeExists(firstIndex, secondIndex, solution);
+    }
+
+    private connectedHorizontal(cellX: number, cellY: number, solution: Node<number>[], direction: number) {
+        const nodeX = cellX + (direction === 1 ? 1 : 0);
+        const firstIndex = nodeX + cellY * this.x;
+        const secondIndex = firstIndex + this.y;
+
+        return !Grid.edgeExists(firstIndex, secondIndex, solution);
+    }
+
+    private static edgeExists(firstIndex: number, secondIndex: number, solution: Node<number>[]) {
         // No revisiting, so the first time we find the index, we can return the answer immediately.
         // So if there's a solution edge between the cells, return false.
         for(let i = 0; i < solution.length - 1; i++) {
@@ -115,15 +133,15 @@ export class Grid {
             var index = node.Index();
 
             if(firstIndex === index) {
-                return solution[i+1].Index() !== secondIndex;
+                return solution[i+1].Index() === secondIndex;
             }
 
             if(secondIndex === index) {
-                return solution[i+1].Index() !== firstIndex;
+                return solution[i+1].Index() === firstIndex;
             }
         }
 
-        return true;
+        return false;
     }
 
     DetermineAllRegions(solution : Node<number>[]) {
@@ -147,75 +165,64 @@ export class Grid {
 
     FloodFill(cellX: number, cellY: number, solution: Node<number>[], regionCells: number[], regionNumber: number = 1) {
         const stack = new Stack<[number, number]>(this.cellY + 1);
-        //const regionCells: boolean[] = new Array<boolean>(this.cellX * this.cellY);
 
         stack.push([cellX, cellY]);
 
-        const connectedUp = (x, y) =>
-            y < this.cellY &&
-            !regionCells[x + (y+1)*this.cellX] &&
-            this.CellsConnected(x, y, x, y + 1, solution);
-
-        const connectedDown = (x, y) =>
-            y > 0 &&
-            !regionCells[x + (y-1)*this.cellX] &&
-            this.CellsConnected(x, y, x, y - 1, solution);
-
-        const connectedRight = (x, y) =>
-            x < this.cellX &&
-            !regionCells[x + 1 + y*this.cellX] &&
-            this.CellsConnected(x, y, x + 1, y, solution);
-
-        const connectedLeft = (x, y) =>
-            x > 0 &&
-            !regionCells[x - 1 + (y+1)*this.cellX] &&
-            this.CellsConnected(x, y, x - 1, y, solution);
-
         while(stack.Size()) {
-            let [x1, y] = stack.pop();
+            let [x, y] = stack.pop();
 
-            while(x1 >= 0 && connectedLeft(x1, y)) x1--;
+            while(this.connectedLeft(x, y, solution, regionCells)) x--;
 
             let spanAbove: boolean;
             let spanBelow: boolean;
             spanAbove = spanBelow = false;
 
-            //console.log('entering inner with ' + x1 + ', ' + y);
-            while(x1 < this.cellX) {
-                regionCells[x1 + this.cellX * y] = regionNumber;
-                const up = connectedUp(x1, y);
+            while(x < this.cellX) {
+                regionCells[x + this.cellX * y] = regionNumber;
+                const up = this.connectedUp(x, y, solution, regionCells);
                 if(!spanAbove && up) {
-                    stack.push([x1, y + 1]);
-                    //console.log('span above at ' + x1 + ', ' + y);
+                    stack.push([x, y + 1]);
                     spanAbove = true;
                 }
-                else if(spanAbove && !up) spanAbove = false;
+                else spanBelow = up;
 
-                const down = connectedDown(x1, y);
+                const down = this.connectedDown(x, y, solution, regionCells);
                 if(!spanBelow && down) {
-                    stack.push([x1, y - 1]);
-                    //console.log('span below at ' + x1 + ', ' + y);
+                    stack.push([x, y - 1]);
                     spanBelow = true;
                 }
-                else if(spanBelow && !down) spanBelow = false;
+                else spanBelow = down;
 
-                if(!connectedRight(x1, y)) break;
-                x1++;
-                //console.log('continuing at ' + x1 + ', ' + y);
+                const right = this.connectedRight(x, y, solution, regionCells);
+                if(!right) break;
+
+                x++;
             }
         }
 
         return regionCells;
     }
+
+    CellX() { return this.cellX; }
+    CellY() { return this.cellY; }
+    X() { return this.x; }
+    Y() { return this.y; }
+
+    IterateCells() : NumberPair[] {
+        return _.range(this.cellX * this.cellY)
+            .map(i => <NumberPair>[i % this.cellX, Math.floor(i / this.cellY)]);
+    }
 }
 
-function getEdges(i: number, x: number, y: number, eightDir: boolean, edges: [number, number][]) {
-    var row = Math.floor(i / x);
-    var col = i % x;
+export type NumberPair = [number, number];
 
-    var up = row < y-1;
-    var right = col < x-1;
-    var left = row > 0;
+function getEdges(i: number, x: number, y: number, eightDir: boolean, edges: [number, number][]) {
+    const row = Math.floor(i / x);
+    const col = i % x;
+
+    const up = row < y-1;
+    const right = col < x-1;
+    const left = row > 0;
 
     if(up) {
         edges.push([i, i+x]);
@@ -228,10 +235,10 @@ function getEdges(i: number, x: number, y: number, eightDir: boolean, edges: [nu
 }
 
 export function createGridGraph(x: number, y: number, eightDir: boolean = false) {
-    var n = x * y;
-    var indices = _.range(n);
+    const n = x * y;
+    const indices = _.range(n);
 
-    var edges : [number, number][] = [];
+    const edges : [number, number][] = [];
     _.each(indices, i => getEdges(i, x, y, eightDir, edges));
 
     return new Graph(indices, edges);

@@ -3,8 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <title>Test</title>
+    <style>
+        .gridRow {
+            overflow: auto;zoom:1;
+        }
+
+        .gridCell {
+            background-color: rgba(0, 5, 116, 0.71);
+            float: left;
+        }
+
+        .gridCell.dead {
+            background-color: inherit;
+        }
+
+        .gridRow:after {
+            content: ' ';
+            display: table-cell;
+        }
+
+        .solutionSegment {
+            background-color: black;
+        }
+
+        .Grid {
+            position: relative;
+        }
+    </style>
 </head>
 <body>
+<div id="grid"></div>
 <script type="text/javascript" src="bundled.js"></script>
 </body>
 </html>

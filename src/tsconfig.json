@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "sourceMap": true,
+    "noImplicitAny": true,
+    "module": "commonjs",
+    "jsx": "react"
+  },
+  "files": [
+    "core/index.ts",
+    "visualization/index.ts",
+    "core/Backtrack.ts",
+    "core/Graph.ts",
+    "core/Util.ts",
+    "core/Grid.ts",
+    "core/Stack.ts",
+    "visualization/GridRenderer.tsx",
+    "../typings/main.d.ts"
+  ]
+}

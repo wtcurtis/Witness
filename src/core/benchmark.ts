@@ -5,17 +5,17 @@ export function benchmark<T>(runs: number, init: () => T, run: (thing: T) => voi
     var runTime: number = 0;
 
     for(var i = 0; i < runs; i++) {
-        var start = new Date();
+        var start = +new Date();
         var thing = init();
-        var end = new Date();
+        var end = +new Date();
 
-        initTime += end - start;
+        initTime += (end - start);
 
-        start = new Date();
+        start = +new Date();
         run(thing);
-        end = new Date();
+        end = +new Date();
 
-        runTime += end - start;
+        runTime += <number>(end - start);
     }
 
     return {
@@ -29,8 +29,8 @@ export interface StackLike<T> {
     pop: () => T
 }
 
-function runOf<T>(n: number) {
-    return (stack: StackLike<T>) => {
+function runOf(n: number) {
+    return (stack: StackLike<number>) => {
         for(var j = 0; j < n; j++) stack.pop();
         for(var j = 0; j < n; j++) stack.push(j);
     };
@@ -39,12 +39,12 @@ function runOf<T>(n: number) {
 function benchmarkCustom(n: number, runs: number) {
     return benchmark<Stack<number>>(runs,
         () => {
-            var stack: Stack<number> = new Stack(n);
+            var stack: Stack<number> = new Stack<number>(n);
             for(var j = 0; j < n; j++) stack.push(j);
 
             return stack;
         },
-        runOf<number>(n)
+        runOf(n)
     )
 }
 
@@ -56,7 +56,7 @@ function benchmarkNative(n: number, runs: number) {
 
             return stack;
         },
-        runOf<number>(n)
+        runOf(n)
     )
 }
 
@@ -68,7 +68,7 @@ function benchmarkNativePrealloc(n: number, runs: number) {
 
             return stack;
         },
-        runOf<number>(n)
+        runOf(n)
     )
 }
 
