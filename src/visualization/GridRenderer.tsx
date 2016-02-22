@@ -15,8 +15,6 @@ export interface GridRendererProps {
 
 export class HtmlGridRenderer extends React.Component<GridRendererProps, {}> {
     render() {
-        window['grid' as any] = this.props.grid as any;
-        window['solution' as any] = this.props.solution as any;
         const grid = this.props.grid;
         const solution = this.props.solution;
         const regions = grid.DetermineAllRegions(solution);
@@ -135,16 +133,13 @@ class SolutionSegment extends React.Component<SolutionSegmentProps, {}> {
 
         let [left, top] = this.indexToLeftTop(actualIndex);
 
-        left = horz ? left + margin : left - margin;
-        top = horz ? top - margin : top + margin;
-
-        const width = horz ? cWidth : margin * 2;
-        const height = horz ? margin * 2 : cWidth;
+        const longSide = cWidth + margin * 4;
+        const shortSide = margin * 2;
 
         var style = {
             position: 'absolute',
-            width: width,
-            height: height,
+            width: horz ? longSide : shortSide,
+            height: horz ? shortSide : longSide,
             left: left,
             top: top
         };
@@ -154,14 +149,15 @@ class SolutionSegment extends React.Component<SolutionSegmentProps, {}> {
 
     indexToLeftTop(index: number) {
         const props = this.props.mainProps;
-        const gridX = props.grid.X();
         const margin = props.cellMargin;
         const width = props.cellWidth;
+
+        const gridX = props.grid.X();
         const x = index % gridX;
         const y = Math.floor(index / gridX);
 
-        const left = (margin * 2 + width) * x;
-        const top = (margin * 2 + width) * y;
+        const left = (margin * 2 + width) * x - margin;
+        const top = (margin * 2 + width) * y - margin;
 
         return [left, top];
     }
@@ -179,12 +175,8 @@ class GridRow extends React.Component<RowProps, {}> {
 
 class GridCell extends React.Component<CellProps, {}> {
     render() {
-        var className = "gridCell";
-        var main = this.props.mainProps;
-
-        if(!main.grid.CellExists(this.props.x, this.props.y)) {
-            className += " dead";
-        }
+        const main = this.props.mainProps;
+        const dead = !main.grid.CellExists(this.props.x, this.props.y);
 
         let colors : string[] = [];
         for(let i = 250; i >= 10; i -= 50) {
@@ -197,10 +189,10 @@ class GridCell extends React.Component<CellProps, {}> {
             width: main.cellWidth,
             height: main.cellWidth,
             margin: main.cellMargin,
-            backgroundColor: colors[this.props.region]
+            backgroundColor: dead ? 'inherit' : colors[this.props.region]
         };
 
-        return <div className={className} style={style} />;
+        return <div className="gridCell" style={style} />;
     }
 }
 

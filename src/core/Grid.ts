@@ -56,27 +56,16 @@ export class Grid {
         return this;
     }
 
-    NodesBoundingCell(cellX: number, cellY: number) {
+    CellExists(cellX: number, cellY: number) {
         var bottomLeft = cellY * this.x + cellX;
         var topLeft = (cellY + 1) * this.x + cellX;
 
-        return [
-            bottomLeft,
-            bottomLeft + 1,
-            topLeft,
-            topLeft + 1
-        ]
-    }
+        var graph = this.graph;
 
-    CellExists(cellX: number, cellY: number) {
-        var boundingNodes = this.NodesBoundingCell(cellX, cellY);
-        var len = boundingNodes.length;
-
-        for(var i = 0; i < len; i++) {
-            if(!this.graph.NodeIsConnected(boundingNodes[i])) {
-                return false;
-            }
-        }
+        if(!graph.NodeIsConnected(bottomLeft)) return false;
+        if(!graph.NodeIsConnected(topLeft)) return false;
+        if(!graph.NodeIsConnected(bottomLeft + 1)) return false;
+        if(!graph.NodeIsConnected(topLeft + 1)) return false;
 
         return true;
     }
@@ -111,6 +100,9 @@ export class Grid {
 
     private connectedVertical(cellX: number, cellY: number, solution: Node<number>[], direction: number) {
         const nodeY = cellY + (direction === 1 ? 1 : 0);
+
+        if(!this.CellExists(cellX, cellY + direction)) return false;
+
         const firstIndex = cellX + nodeY * this.x;
         const secondIndex = firstIndex + 1;
 
@@ -119,6 +111,9 @@ export class Grid {
 
     private connectedHorizontal(cellX: number, cellY: number, solution: Node<number>[], direction: number) {
         const nodeX = cellX + (direction === 1 ? 1 : 0);
+
+        if(!this.CellExists(cellX + direction, cellY)) return false;
+
         const firstIndex = nodeX + cellY * this.x;
         const secondIndex = firstIndex + this.y;
 
@@ -152,7 +147,10 @@ export class Grid {
         for(let i = 0; i < len; i++) {
             if(regionIndexes[i]) continue;
 
-            this.FloodFill(i % this.cellX, Math.floor(i / this.cellX), solution, regionIndexes, regionNumber);
+            const x = i % this.cellX;
+            const y = Math.floor(i / this.cellX);
+
+            this.FloodFill(x, y, solution, regionIndexes, regionNumber);
             regionNumber++;
         }
 
@@ -170,6 +168,7 @@ export class Grid {
 
         while(stack.Size()) {
             let [x, y] = stack.pop();
+            if(!this.CellExists(cellX, cellY)) continue;
 
             while(this.connectedLeft(x, y, solution, regionCells)) x--;
 

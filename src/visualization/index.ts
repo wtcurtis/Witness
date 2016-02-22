@@ -18,10 +18,14 @@ const grid = new Grid(n, n);
 
 //grid.Graph().DeleteNodeAt(0);
 
+grid.DeleteNode(0)
+    .DeleteNode(9)
+    .DeleteNode(99)
+    .DeleteNode(90);
 ReactDom.render(React.createElement(HtmlGridRenderer, {
     grid: grid,
     //solution: [0, 1, 7, 13, 19, 25, 31, 32, 26, 20, 14, 8, 2, 3, 4, 5, 11, 10, 16, 17, 23, 22, 28, 29].map(n => grid.Graph().NodeAt(n)),
-    solution: [0].map(n => grid.Graph().NodeAt(n)),
-    cellWidth: 50,
-    cellMargin: 2
+    solution: [2].map(n => grid.Graph().NodeAt(n)),
+    cellWidth: 80,
+    cellMargin: 10
 }), document.getElementById('grid'));
