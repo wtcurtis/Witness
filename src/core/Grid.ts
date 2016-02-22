@@ -177,21 +177,27 @@ export class Grid {
             let spanBelow: boolean;
             spanAbove = spanBelow = false;
 
+            // upLeft / downLeft cover an edge case where, e.g., spanAbove remains true, but a segment wall
+            // exists between this and the last. Means we need another stack push for the pseudo-disconnected
+            // region.
             while(x < this.cellX) {
-                regionCells[x + this.cellX * y] = regionNumber;
                 const up = this.connectedUp(x, y, solution, regionCells);
-                if(!spanAbove && up) {
+                const upLeft = up ? this.connectedLeft(x, y+1, solution, regionCells) : true;
+                if(up && (!spanAbove || !upLeft)) {
                     stack.push([x, y + 1]);
-                    spanAbove = true;
                 }
-                else spanBelow = up;
+
+                spanAbove = up;
 
                 const down = this.connectedDown(x, y, solution, regionCells);
-                if(!spanBelow && down) {
+                const downLeft = down ? this.connectedLeft(x, y-1, solution, regionCells) : true;
+                if(down && (!spanBelow || !downLeft)) {
                     stack.push([x, y - 1]);
-                    spanBelow = true;
                 }
-                else spanBelow = down;
+
+                spanBelow = down;
+
+                regionCells[x + this.cellX * y] = regionNumber;
 
                 const right = this.connectedRight(x, y, solution, regionCells);
                 if(!right) break;

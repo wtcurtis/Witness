@@ -186,15 +186,12 @@ class GridCell extends React.Component<CellProps, {}> {
             className += " dead";
         }
 
-        var colors = [
-            null,
-            'steelblue',
-            'lightsteelblue',
-            'green',
-            'red',
-            'blue',
-            'black',
-        ];
+        let colors : string[] = [];
+        for(let i = 250; i >= 10; i -= 50) {
+            for(let j = 250; j >= 10; j -= 50) {
+                colors.push('rgb(' + i  + ', ' + j + ', ' + i + ')');
+            }
+        }
 
         const style = {
             width: main.cellWidth,
