@@ -70,6 +70,26 @@ export class Grid {
         return true;
     }
 
+    CellsBoundingNodeIndex(index: number) {
+        return this.CellsBoundingNode(this.graph.NodeAt(index));
+    }
+
+    CellsBoundingNode(node: Node<number>) {
+        if(!node) return [];
+        const index = node.Index();
+        const nodeX = index % this.x;
+        const nodeY = Math.floor(index / this.x);
+
+        var cells: number[] = [];
+
+        if(this.CellExists(nodeX, nodeY)) cells.push(nodeX + this.cellX * nodeY);
+        if(this.CellExists(nodeX - 1, nodeY)) cells.push((nodeX - 1) + this.cellX * nodeY);
+        if(this.CellExists(nodeX, nodeY - 1)) cells.push(nodeX + this.cellX * (nodeY - 1));
+        if(this.CellExists(nodeX - 1, nodeY - 1)) cells.push((nodeX - 1) + this.cellX * (nodeY - 1));
+
+        return cells;
+    }
+
     private connectedUp(cellX: number, cellY: number, solution: Node<number>[], regionIndexes: number[]) {
         if(cellY >= this.cellY-1) return false;
         if(regionIndexes[cellX + (cellY+1)*this.cellX]) return false;
@@ -157,8 +177,13 @@ export class Grid {
         return regionIndexes;
     }
 
-    IsEdgeNode(index: number) {
-        return this.regionGraph.NodeAt(index).Nodes().length < 8;
+    CellIndex(cellX: number, cellY: number) {
+        return this.cellX * cellY + cellX;
+    }
+
+    IsEdgeNode(node: Node<number>) {
+        if(!node) return false;
+        return this.regionGraph.NodeAt(node.Index()).Nodes().length < 8;
     }
 
     FloodFill(cellX: number, cellY: number, solution: Node<number>[], regionCells: number[], regionNumber: number = 1) {

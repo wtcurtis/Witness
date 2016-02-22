@@ -8,12 +8,16 @@
   },
   "files": [
     "core/index.ts",
-    "visualization/index.ts",
     "core/Backtrack.ts",
+    "core/Solution.ts",
+    "core/GridSolver.ts",
     "core/Graph.ts",
     "core/Util.ts",
     "core/Grid.ts",
     "core/Stack.ts",
+    "core/rules/Rule.ts",
+    "core/rules/CellCategory.ts",
+    "visualization/index.ts",
     "visualization/GridRenderer.tsx",
     "../typings/main.d.ts"
   ]

@@ -1,16 +1,21 @@
 ///<reference path="../core/Grid.ts"/>
 ///<reference path="../core/Graph.ts"/>
 ///<reference path="../../typings/main.d.ts"/>
+///<reference path="../core/GridSolver.ts"/>
+///<reference path="../core/Solution.ts"/>
 import {Grid} from "../core/Grid";
 import {Node} from "../core/Graph";
 import React = require('react');
 import {last} from "../core/Util";
+import {GridSolver} from "../core/GridSolver";
+import {GraphSolution} from "../core/Solution";
 
 export interface GridRendererProps {
     grid: Grid,
     solution: Node<number>[],
     cellWidth: number,
-    cellMargin: number
+    cellMargin: number,
+    solver: GridSolver
 }
 
 export class HtmlGridRenderer extends React.Component<GridRendererProps, {}> {
@@ -61,11 +66,35 @@ export class HtmlGridRenderer extends React.Component<GridRendererProps, {}> {
         this.forceUpdate();
     }
 
+    Solve() {
+        const toFind = 100;
+        const solver = this.props.solver;
+        const solutions = solver.Solve(toFind, new GraphSolution(this.props.solution, [], []));
+        const graph = this.props.grid.Graph();
+        let i = 0;
+
+        const interval = setInterval(() => {
+            const solution = solutions[i++];
+            if(!solution) {
+                clearInterval(interval);
+                return;
+            }
+
+            this.props.solution.splice(0);
+            for(let i = 0; i < solution.length; i++) {
+                this.props.solution[i] = graph.NodeAt(solution[i]);
+            }
+
+            this.forceUpdate();
+        }, 100);
+    }
+
     keyDown(e: React.KeyboardEvent) {
         if(e.keyCode === 37) this.moveSolution(-1, 0);
         if(e.keyCode === 39) this.moveSolution(1, 0);
         if(e.keyCode === 38) this.moveSolution(0, -1);
         if(e.keyCode === 40) this.moveSolution(0, 1);
+        if(e.keyCode === 32) this.Solve();
     }
 }
 
