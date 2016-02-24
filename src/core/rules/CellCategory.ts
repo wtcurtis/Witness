@@ -5,6 +5,9 @@ import {Grid} from "../Grid";
 import {GraphSolution} from "../Solution";
 import {GridSolver} from "../GridSolver";
 
+/**
+ * This is the square color cell sections (where each region must contain at most one color)
+ */
 export class CellCategory {
     protected grid: Grid;
     protected categories: number[];
@@ -17,6 +20,7 @@ export class CellCategory {
 
     public SetSolver(solver: GridSolver) {
         this.solver = solver;
+        return this;
     }
 
     public AddCategoryAt(category: number, cellX: number, cellY: number) {

@@ -19,7 +19,7 @@ export class GridSolver {
         this.rules = [];
 
         this.startNodes = startNodes;
-        this.exitNodes = exitNodes
+        this.exitNodes = exitNodes;
 
         this.allowBacktrack = allowBacktrack;
     }
@@ -79,8 +79,12 @@ export class GridSolver {
         Backtrack<Node<number>>(
             firstSolution,
             (s: GraphSolution) => this.Reject(s),
-            (s: GraphSolution) => s.Last().Index() === this.exitNodes[0],
-            (s: GraphSolution) => notPresent(s.RawSolution(), s.Last().Nodes()),
+            (s: GraphSolution) => this.IsExit(s.Last()),
+            (s: GraphSolution) => {
+                const available = notPresent(s.RawSolution(), s.Last().Nodes());
+                const lastIndex = s.Last().Index();
+                return _.sortBy(available, n => -Math.abs(n.Index() - lastIndex));
+            },
             (s: GraphSolution) => {
                 solutions.push(s.RawSolution().map(t => t.Index()));
                 if(solutions.length % 100000 === 0) console.log(`Up to ${solutions.length} distinct solutions`);

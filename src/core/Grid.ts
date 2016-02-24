@@ -71,12 +71,6 @@ export class Grid {
     }
 
     CellsBoundingNodeIndex(index: number) {
-        return this.CellsBoundingNode(this.graph.NodeAt(index));
-    }
-
-    CellsBoundingNode(node: Node<number>) {
-        if(!node) return [];
-        const index = node.Index();
         const nodeX = index % this.x;
         const nodeY = Math.floor(index / this.x);
 
@@ -86,6 +80,41 @@ export class Grid {
         if(this.CellExists(nodeX - 1, nodeY)) cells.push((nodeX - 1) + this.cellX * nodeY);
         if(this.CellExists(nodeX, nodeY - 1)) cells.push(nodeX + this.cellX * (nodeY - 1));
         if(this.CellExists(nodeX - 1, nodeY - 1)) cells.push((nodeX - 1) + this.cellX * (nodeY - 1));
+
+        return cells;
+    }
+
+    CellsBoundingNode(node: Node<number>) {
+        if(!node) return [];
+        return this.CellsBoundingNodeIndex(node.Index());
+    }
+
+    CellsBoundingEdge(from: Node<number>, to: Node<number>) {
+        if(!from || !to) return [];
+
+        return this.CellsBoundingEdgeIndex(from.Index(), to.Index());
+    }
+
+    CellsBoundingEdgeIndex(from: number, to: number) {
+        const first = from > to ? to : from;
+        const second = from > to ? from : to;
+
+        const nodeX = first % this.x;
+        const nodeY = Math.floor(first / this.x);
+
+        const diff = second - first;
+
+        const cells: number[] = [];
+
+        if(diff === 1) {
+            if(this.CellExists(nodeX, nodeY)) cells.push(nodeX + this.cellX * nodeY);
+            if(this.CellExists(nodeX, nodeY - 1)) cells.push(nodeX + 1 + this.cellX * nodeY);
+        }
+
+        else {
+            if(this.CellExists(nodeX - 1, nodeY - 1)) cells.push(nodeX + this.cellX * nodeY);
+            if(this.CellExists(nodeX + 1, nodeY - 1)) cells.push(nodeX + this.cellX * nodeY);
+        }
 
         return cells;
     }

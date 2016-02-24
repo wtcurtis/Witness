@@ -16,6 +16,7 @@
     "core/Grid.ts",
     "core/Stack.ts",
     "core/rules/Rule.ts",
+    "core/rules/RequiredVisit.ts",
     "core/rules/CellCategory.ts",
     "visualization/index.ts",
     "visualization/GridRenderer.tsx",
