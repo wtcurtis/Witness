@@ -31,12 +31,14 @@ const solver = new GridSolver(grid, [0], [35, 5], true);
 const cats = new CellCategory(grid);
 
 cats.AddCategoryAt(1, 0, 0);
-cats.AddCategoryAt(1, 4, 0);
 cats.AddCategoryAt(2, 0, 2);
 cats.AddCategoryAt(3, 0, 4);
+cats.AddCategoryAt(1, 4, 0);
+cats.AddCategoryAt(2, 4, 2);
 solver.AddRule(cats);
 
 const visits = new RequiredVisit(grid);
+visits.AddNodeVisit(2);
 visits.AddEdgeVisit(1, 7);
 visits.AddEdgeVisit(6, 12);
 visits.AddEdgeVisit(13, 19);

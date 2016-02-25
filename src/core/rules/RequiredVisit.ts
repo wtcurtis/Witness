@@ -50,4 +50,6 @@ export class RequiredVisit implements Rule {
     SetSolver(solver:GridSolver) : void {
         this.solver = solver;
     }
+
+    Visits() { return this.visits; }
 }

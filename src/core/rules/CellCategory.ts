@@ -1,14 +1,16 @@
 ///<reference path="../Grid.ts"/>
 ///<reference path="../Solution.ts"/>
 ///<reference path="../GridSolver.ts"/>
+///<reference path="Rule.ts"/>
 import {Grid} from "../Grid";
 import {GraphSolution} from "../Solution";
 import {GridSolver} from "../GridSolver";
+import {Rule} from "./Rule";
 
 /**
  * This is the square color cell sections (where each region must contain at most one color)
  */
-export class CellCategory {
+export class CellCategory implements Rule {
     protected grid: Grid;
     protected categories: number[];
     protected solver: GridSolver;
@@ -61,4 +63,6 @@ export class CellCategory {
 
         return false;
     }
+
+    public Categories() { return this.categories; }
 }

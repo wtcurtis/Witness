@@ -95,6 +95,10 @@ export class GridSolver {
         return solutions;
     }
 
+    IsSolution(solution: GraphSolution) {
+        return this.IsExit(solution.Last()) && !this.Reject(solution);
+    }
+
     IsExit(node: Node<number>) {
         const index = node.Index();
         for(let i = 0; i < this.exitNodes.length; i++) {
@@ -103,4 +107,6 @@ export class GridSolver {
 
         return false;
     }
+
+    Rules() { return this.rules; }
 }
