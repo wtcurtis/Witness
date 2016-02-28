@@ -15,7 +15,6 @@ import {GraphSolution} from "../core/Solution";
 
 const n = 6;
 
-const grid = new Grid(n, n);
 
 //var region = grid.DetermineAllRegions([18, 19, 20, 14, 8, 2].map(n => grid.Graph().NodeAt(n))); console.log(region);
 //
@@ -29,25 +28,70 @@ const grid = new Grid(n, n);
 //    .DeleteNode(99)
 //    .DeleteNode(90);
 
-const solver = getSolverFull(grid);
+const [solver, grid] = getCombinedSolver();
 window[<any>'rendered'] = <any>ReactDom.render(React.createElement(HtmlGridRenderer, {
     grid: grid,
     //solution: [0, 1, 7, 13, 19, 25, 31, 32, 26, 20, 14, 8, 2, 3, 4, 5, 11, 10, 16, 17, 23, 22, 28, 29].map(n => grid.Graph().NodeAt(n)),
-    solution: new GraphSolution([0].map(n => grid.Graph().NodeAt(n))),
+    solution: new GraphSolution([grid.Graph().NodeAt(solver.StartNodes()[0])]),
     solver: solver,
     cellWidth: 80,
     cellMargin: 10
 }), document.getElementById('grid'));
 
-function getSolverFull(grid: Grid) {
+function getSolverPairs(): [GridSolver, Grid] {
+    const grid = new Grid(6, 6);
     const solver = new GridSolver(grid, [0], [35, 5], true);
     const cats = new CellCategory(grid);
 
     const [maxX, maxY] = [grid.CellX() - 1, grid.CellY() - 1];
 
+    cats.AddPairCategoryAt(1, 0, 0);
+    cats.AddPairCategoryAt(1, 0, maxY);
+    cats.AddPairCategoryAt(2, maxX, 0);
+    cats.AddPairCategoryAt(2, maxX, maxY);
+
+    solver.AddRule(cats);
+    return [solver, grid];
+}
+
+function getCombinedSolver(): [GridSolver, Grid] {
+    const grid = new Grid(6, 5);
+    const solver = new GridSolver(grid, [3], [27], true);
+    const cats = new CellCategory(grid);
+
     cats.AddCategoryAt(1, 0, 0);
+    cats.AddCategoryAt(1, 1, 0);
+
+    cats.AddPairCategoryAt(2, 0, 1);
+    cats.AddPairCategoryAt(2, 1, 1);
+    cats.AddPairCategoryAt(2, 0, 3);
+    cats.AddPairCategoryAt(2, 1, 3);
+
+    cats.AddCategoryAt(3, 0, 2);
+    cats.AddCategoryAt(3, 1, 2);
+    cats.AddCategoryAt(3, 2, 2);
+    cats.AddCategoryAt(3, 2, 3);
+
+    cats.AddPairCategoryAt(2, 3, 2);
+    cats.AddPairCategoryAt(2, 3, 1);
+
+    cats.AddCategoryAt(1, 4, 2);
+    cats.AddCategoryAt(1, 4, 1);
+
+    solver.AddRule(cats);
+    return [solver, grid];
+}
+
+function getSolverFull(): [GridSolver, Grid] {
+    const grid = new Grid(6, 6);
+    const solver = new GridSolver(grid, [0], [35, 5], true);
+    const cats = new CellCategory(grid);
+
+    const [maxX, maxY] = [grid.CellX() - 1, grid.CellY() - 1];
+
+    cats.AddPairCategoryAt(1, 0, 0);
+    cats.AddPairCategoryAt(1, 0, maxY);
     cats.AddCategoryAt(1, maxX, 0);
-    cats.AddCategoryAt(1, 0, maxY);
     cats.AddCategoryAt(1, maxX, maxY);
 
     for(let i = 1; i < maxX; i++) cats.AddCategoryAt(2, i, 0);
@@ -68,29 +112,5 @@ function getSolverFull(grid: Grid) {
 
     solver.AddRule(visits);
 
-    return solver;
-}
-
-function get6Solver(grid: Grid) {
-    const solver = new GridSolver(grid, [0], [35, 5], true);
-    const cats = new CellCategory(grid);
-
-    cats.AddCategoryAt(1, 0, 0);
-    cats.AddCategoryAt(2, 0, 2);
-    cats.AddCategoryAt(3, 0, 4);
-    cats.AddCategoryAt(1, 4, 0);
-    cats.AddCategoryAt(2, 4, 2);
-    solver.AddRule(cats);
-
-    const visits = new RequiredVisit(grid);
-    visits.AddNodeVisit(2);
-    visits.AddEdgeVisit(1, 7);
-    visits.AddEdgeVisit(6, 12);
-    visits.AddEdgeVisit(13, 19);
-    visits.AddEdgeVisit(18, 24);
-    visits.AddEdgeVisit(25, 31);
-
-    solver.AddRule(visits);
-
-    return solver;
+    return [solver, grid];
 }

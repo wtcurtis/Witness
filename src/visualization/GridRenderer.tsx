@@ -267,6 +267,25 @@ class CellCategoryRule extends React.Component<CatProps, {}> {
             return <div style={style} className="cellCategory" />
         }).filter(el => !!el);
 
+        const pairs = rule.PairCategories();
+        for(let i = 0; i < pairs.length; i++) {
+            const c = pairs[i];
+            if(!c) continue;
+
+            const [left, top] = this.indexToLeftTop(i);
+            const style = {
+                position: 'absolute',
+                width: width,
+                height: height,
+                left: left,
+                top: top,
+                backgroundColor: this.colorFromRegion(c),
+                transform: 'rotate(45deg)'
+            };
+
+            children.push(<div style={style} className="cellCategoryPair" />);
+        }
+
         return <div className="cellCategoryGroup">
             {children}
         </div>;
@@ -429,10 +448,9 @@ function cellCenterIndex(cellIndex: number, props: GridRendererProps) {
 
 class GridRow extends React.Component<RowProps, {}> {
     render() {
+        var children = this.props.cells.map(c =><GridCell {...c} />);
         return <div className="gridRow">
-            {this.props.cells.map(c =>
-                <GridCell {...c} />
-            )}
+            {children}
         </div>
     }
 }

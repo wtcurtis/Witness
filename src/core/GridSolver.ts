@@ -119,4 +119,6 @@ export class GridSolver {
     }
 
     Rules() { return this.rules; }
+    ExitNodes() { return this.exitNodes; }
+    StartNodes() { return this.startNodes; }
 }

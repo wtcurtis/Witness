@@ -166,7 +166,7 @@ export class Grid {
         if(!this.CellExists(cellX + direction, cellY)) return false;
 
         const firstIndex = nodeX + cellY * this.x;
-        const secondIndex = firstIndex + this.y;
+        const secondIndex = firstIndex + this.x;
 
         return !Grid.edgeExists(firstIndex, secondIndex, solution);
     }
@@ -271,7 +271,7 @@ export class Grid {
 
     IterateCells() : NumberPair[] {
         return _.range(this.cellX * this.cellY)
-            .map(i => <NumberPair>[i % this.cellX, Math.floor(i / this.cellY)]);
+            .map(i => <NumberPair>[i % this.cellX, Math.floor(i / this.cellX)]);
     }
 }
 
