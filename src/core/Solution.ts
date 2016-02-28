@@ -53,14 +53,32 @@ export class GraphSolution extends Solution<Node<number>> {
     /** Region numbers that currently contain an exit. */
     private exitRegions: number[];
 
-    constructor(solution: Node<number>[], regions: number[], groupedRegions: number[][]) {
+    constructor(solution: Node<number>[], regions: number[] = [], groupedRegions: number[][] = []) {
         super(solution);
         this.regions = regions;
         this.groupedRegions = groupedRegions;
     }
 
+    public setAllRegions(allRegions: number[]) {
+        this.allRegions = allRegions;
+        return this;
+    }
+
+    public setOpenRegion(region: number) {
+        this.openRegion = region;
+        return this;
+    }
+
+    public setClosedRegions(regions: number[]) {
+        this.closedRegions = regions;
+        return this;
+    }
+
     public CloneWith(newEl: Node<number>) {
-        return new GraphSolution(clonePush(this.solution, newEl), this.regions, this.groupedRegions);
+        return new GraphSolution(clonePush(this.solution, newEl), this.regions, this.groupedRegions)
+            .setAllRegions(this.allRegions)
+            .setOpenRegion(this.openRegion)
+            .setClosedRegions(this.closedRegions);
     }
 
     private SetClosedRegions() {
@@ -120,19 +138,28 @@ export class GraphSolution extends Solution<Node<number>> {
     }
 
     public SetRegions(grid: Grid, solver: GridSolver) {
-        if(this.regions.length) {
-            // If we're on an edge node, but the previous was also an edge, we
-            // can't have defined a new region.
-            const lastIsEdge = grid.IsEdgeNode(this.Last());
-            const prevIsEdge = grid.IsEdgeNode(this.Previous());
+        //if(true || this.regions.length) {
+        //    // If we're on an edge node, but the previous was also an edge, we
+        //    // can't have defined a new region.
+        //    const lastIsEdge = grid.IsEdgeNode(this.Last());
+        //    const prevIsEdge = grid.IsEdgeNode(this.Previous());
+        //
+        //    if(!lastIsEdge || prevIsEdge) {
+        //        this.SetOpenRegion(grid, solver);
+        //        return this;
+        //    }
+        //}
 
-            if(!lastIsEdge || prevIsEdge) {
-                this.SetOpenRegion(grid, solver);
-                return this;
-            }
+        const lastIsEdge = grid.IsEdgeNode(this.Last());
+        const prevIsEdge = grid.IsEdgeNode(this.Previous());
+
+        if(!this.regions.length || (lastIsEdge && !prevIsEdge) || (this.openRegion < 0)) {
+            this.regions = grid.DetermineAllRegions(this.solution);
+        } else {
+            let blah = 1;
+
         }
 
-        this.regions = grid.DetermineAllRegions(this.solution);
         this.GroupRegions(this.regions);
         this.SetOpenRegion(grid, solver);
         this.SetClosedRegions();
@@ -236,4 +263,9 @@ export class GraphSolution extends Solution<Node<number>> {
 
     public Regions() { return this.regions; }
     public GroupedRegions() { return this.groupedRegions; }
+
+    public SetRawSolution(solution: GraphSolution) {
+        this.solution = solution.RawSolution();
+        return this;
+    }
 }

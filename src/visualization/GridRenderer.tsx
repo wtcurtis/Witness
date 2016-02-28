@@ -17,16 +17,18 @@ import {RequiredVisit} from "../core/rules/RequiredVisit";
 
 export interface GridRendererProps {
     grid: Grid,
-    solution: Node<number>[],
+    solution: GraphSolution,
     cellWidth: number,
     cellMargin: number,
     solver: GridSolver
 }
 
 export class HtmlGridRenderer extends React.Component<GridRendererProps, {}> {
+    public lastRejections: GraphSolution[];
+
     render() {
         const grid = this.props.grid;
-        const solution = this.props.solution;
+        const solution = this.props.solution.RawSolution();
         const regions = grid.DetermineAllRegions(solution);
 
         var children = _.chunk(grid.IterateCells(), grid.CellX())
@@ -54,7 +56,7 @@ export class HtmlGridRenderer extends React.Component<GridRendererProps, {}> {
     }
 
     moveSolution(x: number, y: number) {
-        const solution = this.props.solution;
+        const solution = this.props.solution.RawSolution();
         const lastEl = last(solution);
         const grid = this.props.grid;
 
@@ -78,10 +80,29 @@ export class HtmlGridRenderer extends React.Component<GridRendererProps, {}> {
         this.forceUpdate();
     }
 
-    Solve() {
-        const toFind = 100;
+    renderFailedSolutions(timeout: number = 1000) {
+        if(!this.lastRejections) return;
+
+        let i = 0;
+        let interval = setInterval(() => {
+            if(!this.lastRejections[i]) {
+                clearInterval(interval);
+                return;
+            }
+
+            this.renderSolution(this.lastRejections[i++]);
+        }, timeout);
+    }
+
+    renderSolution(solution: GraphSolution) {
+        this.props.solution.SetRawSolution(solution);
+        this.forceUpdate();
+    }
+
+    Solve(toFind: number = 100) {
         const solver = this.props.solver;
-        const solutions = solver.Solve(toFind, new GraphSolution(this.props.solution, [], []));
+        const [solutions, rejections] = solver.Solve(toFind, this.props.solution);
+        this.lastRejections = rejections;
         const graph = this.props.grid.Graph();
         let i = 0;
 
@@ -92,9 +113,10 @@ export class HtmlGridRenderer extends React.Component<GridRendererProps, {}> {
                 return;
             }
 
-            this.props.solution.splice(0);
+            var rawSolution = this.props.solution.RawSolution();
+            rawSolution.splice(0);
             for(let i = 0; i < solution.length; i++) {
-                this.props.solution[i] = graph.NodeAt(solution[i]);
+                rawSolution[i] = graph.NodeAt(solution[i]);
             }
 
             this.forceUpdate();
@@ -106,7 +128,7 @@ export class HtmlGridRenderer extends React.Component<GridRendererProps, {}> {
         if(e.keyCode === 39) this.moveSolution(1, 0);
         if(e.keyCode === 38) this.moveSolution(0, -1);
         if(e.keyCode === 40) this.moveSolution(0, 1);
-        if(e.keyCode === 32) this.Solve();
+        if(e.keyCode === 32) this.Solve(1);
     }
 }
 
@@ -144,14 +166,14 @@ class Solution extends React.Component<SolutionProps, {}> {
     }
 
     getNodePairs() {
-        const solution = this.props.mainProps.solution;
+        const solution = this.props.mainProps.solution.RawSolution();
 
         let last: number = null;
         let indexPairs: [number, number][] = [];
         for(let i = 0; i < solution.length; i++) {
             let node = solution[i];
 
-            if(!last) {
+            if(last === null) {
                 last = node.Index();
                 continue;
             }
@@ -420,18 +442,23 @@ class GridCell extends React.Component<CellProps, {}> {
         const main = this.props.mainProps;
         const dead = !main.grid.CellExists(this.props.x, this.props.y);
 
-        let colors : string[] = [];
-        for(let i = 250; i >= 10; i -= 50) {
-            for(let j = 250; j >= 10; j -= 80) {
-                colors.push('rgb(' + i  + ', ' + j + ', ' + i + ')');
-            }
-        }
+        const colors = [
+            '#ffffd9',
+            '#edf8b1',
+            '#c7e9b4',
+            '#7fcdbb',
+            '#41b6c4',
+            '#1d91c0',
+            '#225ea8',
+            '#253494',
+            '#081d58',
+        ];
 
         const style = {
             width: main.cellWidth,
             height: main.cellWidth,
             margin: main.cellMargin,
-            backgroundColor: dead ? 'inherit' : colors[this.props.region]
+            backgroundColor: dead ? 'inherit' : colors[this.props.region % colors.length]
         };
 
         return <div className="gridCell" style={style} />;

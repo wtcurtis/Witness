@@ -57,7 +57,10 @@ export class CellCategory implements Rule {
                 if(cat === void 0) continue;
                 if(lastCategory === -1) lastCategory = cat;
 
-                if(cat !== lastCategory) return true;
+                if(cat !== lastCategory) {
+                    //console.log('rejecting, category', solution);
+                    return true;
+                }
             }
         }
 

@@ -57,6 +57,8 @@ export class Grid {
     }
 
     CellExists(cellX: number, cellY: number) {
+        if(cellX < 0 || cellX >= this.cellX) return false;
+        if(cellY < 0 || cellY >= this.cellY) return false;
         var bottomLeft = cellY * this.x + cellX;
         var topLeft = (cellY + 1) * this.x + cellX;
 
@@ -108,12 +110,12 @@ export class Grid {
 
         if(diff === 1) {
             if(this.CellExists(nodeX, nodeY)) cells.push(nodeX + this.cellX * nodeY);
-            if(this.CellExists(nodeX, nodeY - 1)) cells.push(nodeX + 1 + this.cellX * nodeY);
+            if(this.CellExists(nodeX, nodeY - 1)) cells.push(nodeX + this.cellX * (nodeY - 1));
         }
 
         else {
-            if(this.CellExists(nodeX - 1, nodeY - 1)) cells.push(nodeX + this.cellX * nodeY);
-            if(this.CellExists(nodeX + 1, nodeY - 1)) cells.push(nodeX + this.cellX * nodeY);
+            if(this.CellExists(nodeX - 1, nodeY)) cells.push(nodeX - 1 + this.cellX * nodeY);
+            if(this.CellExists(nodeX, nodeY)) cells.push(nodeX + this.cellX * nodeY);
         }
 
         return cells;
@@ -281,7 +283,7 @@ function getEdges(i: number, x: number, y: number, eightDir: boolean, edges: [nu
 
     const up = row < y-1;
     const right = col < x-1;
-    const left = row > 0;
+    const left = col > 0;
 
     if(up) {
         edges.push([i, i+x]);

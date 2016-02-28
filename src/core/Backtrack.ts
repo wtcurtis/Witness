@@ -15,6 +15,7 @@ export function Backtrack<T>(
     solutionCount: number = -1
 )
 {
+    totalInBt = 0;
     let foundSolutions = 0;
     const bt = function(s: Solution<T>) {
         totalInBt++;
@@ -31,11 +32,12 @@ export function Backtrack<T>(
             if(!found) continue;
 
             foundSolutions++;
-            if(solutionCount !== -1 && foundSolutions > solutionCount) {
+            if(solutionCount !== -1 && foundSolutions >= solutionCount) {
                 return true;
             }
         }
     };
 
     bt(start);
+    console.log('total in backtrack: ' + totalInBt);
 }

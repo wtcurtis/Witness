@@ -43,7 +43,7 @@ export class GridSolver {
             for(let i = 0; i < cellIndexes.length; i++) {
                 var cell = cellIndexes[i];
                 for(let k = 0; k < exitCells.length; k++) {
-                    if(cell === exitCells[j]) return true;
+                    if(cell === exitCells[k]) return true;
                 }
             }
         }
@@ -58,7 +58,10 @@ export class GridSolver {
             if(this.rules[i].Reject(s)) return true;
         }
 
-        if(!this.OpenRegionContainsExit(s)) return true;
+        if(!this.OpenRegionContainsExit(s)) {
+            //console.log('rejecting, open region without exit', s);
+            return true;
+        }
 
         if(!this.allowBacktrack) {
             if(!s.Previous() || !s.Last()) return false;
@@ -69,21 +72,28 @@ export class GridSolver {
         return false;
     }
 
-    Solve(totalToFind: number, start: GraphSolution = null) {
+    Solve(totalToFind: number, start: GraphSolution = null, storeRejections: number = 0) : [number[][], GraphSolution[]] {
         const firstSolution = start || new GraphSolution(
             [this.grid.Graph().NodeAt(this.startNodes[0])],
             [], []
         );
 
-        var solutions : number[][] = [];
+        firstSolution.SetRegions(this.grid, this);
+
+        const solutions: number[][] = [];
+        const rejections: GraphSolution[] = [];
         Backtrack<Node<number>>(
             firstSolution,
-            (s: GraphSolution) => this.Reject(s),
+            (s: GraphSolution) => {
+                const rejected = this.Reject(s);
+                if(rejected && storeRejections > rejections.length) rejections.push(s);
+                return rejected;
+            },
             (s: GraphSolution) => this.IsExit(s.Last()),
             (s: GraphSolution) => {
-                const available = notPresent(s.RawSolution(), s.Last().Nodes());
-                const lastIndex = s.Last().Index();
-                return _.sortBy(available, n => -Math.abs(n.Index() - lastIndex));
+                return notPresent(s.RawSolution(), s.Last().Nodes());
+                //const lastIndex = s.Last().Index();
+                //return _.sortBy(available, n => -Math.abs(n.Index() - lastIndex));
             },
             (s: GraphSolution) => {
                 solutions.push(s.RawSolution().map(t => t.Index()));
@@ -92,7 +102,7 @@ export class GridSolver {
             totalToFind
         );
 
-        return solutions;
+        return [solutions, rejections];
     }
 
     IsSolution(solution: GraphSolution) {
