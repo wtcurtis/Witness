@@ -74,6 +74,8 @@ export class GraphSolution extends Solution<Node<number>> {
         return this;
     }
 
+    public ClosedRegions() { return this.closedRegions; }
+
     public CloneWith(newEl: Node<number>) {
         return new GraphSolution(clonePush(this.solution, newEl), this.regions, this.groupedRegions)
             .setAllRegions(this.allRegions)
@@ -137,7 +139,7 @@ export class GraphSolution extends Solution<Node<number>> {
         this.openRegion = lastRegion;
     }
 
-    public SetRegions(grid: Grid, solver: GridSolver) {
+    public SetRegions(grid: Grid, solver: GridSolver, force: boolean = false) {
         //if(true || this.regions.length) {
         //    // If we're on an edge node, but the previous was also an edge, we
         //    // can't have defined a new region.
@@ -153,7 +155,7 @@ export class GraphSolution extends Solution<Node<number>> {
         const lastIsEdge = grid.IsEdgeNode(this.Last());
         const prevIsEdge = grid.IsEdgeNode(this.Previous());
 
-        if(!this.regions.length || (lastIsEdge && !prevIsEdge) || (this.openRegion < 0)) {
+        if(force || !this.regions.length || (lastIsEdge && !prevIsEdge) || (this.openRegion < 0)) {
             this.regions = grid.DetermineAllRegions(this.solution);
         } else {
             let blah = 1;
@@ -263,6 +265,7 @@ export class GraphSolution extends Solution<Node<number>> {
 
     public Regions() { return this.regions; }
     public GroupedRegions() { return this.groupedRegions; }
+    public AllRegions() { return this.allRegions; }
 
     public SetRawSolution(solution: GraphSolution) {
         this.solution = solution.RawSolution();

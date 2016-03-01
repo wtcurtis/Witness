@@ -12,6 +12,7 @@ import {GridSolver} from "../core/GridSolver";
 import {CellCategory} from "../core/rules/CellCategory";
 import {RequiredVisit} from "../core/rules/RequiredVisit";
 import {GraphSolution} from "../core/Solution";
+import {TetrisRule} from "../core/rules/TetrisRule";
 
 const n = 6;
 
@@ -28,7 +29,7 @@ const n = 6;
 //    .DeleteNode(99)
 //    .DeleteNode(90);
 
-const [solver, grid] = getCombinedSolver();
+const [solver, grid] = getSolverPairs();
 window[<any>'rendered'] = <any>ReactDom.render(React.createElement(HtmlGridRenderer, {
     grid: grid,
     //solution: [0, 1, 7, 13, 19, 25, 31, 32, 26, 20, 14, 8, 2, 3, 4, 5, 11, 10, 16, 17, 23, 22, 28, 29].map(n => grid.Graph().NodeAt(n)),
@@ -46,11 +47,17 @@ function getSolverPairs(): [GridSolver, Grid] {
     const [maxX, maxY] = [grid.CellX() - 1, grid.CellY() - 1];
 
     cats.AddPairCategoryAt(1, 0, 0);
-    cats.AddPairCategoryAt(1, 0, maxY);
+    cats.AddPairCategoryAt(1, 0, maxY - 1);
     cats.AddPairCategoryAt(2, maxX, 0);
     cats.AddPairCategoryAt(2, maxX, maxY);
 
     solver.AddRule(cats);
+
+    const tetris = new TetrisRule(grid);
+    tetris.AddSquareBlock([0, 1]);
+    tetris.AddLBlock([2, 1]);
+    solver.AddRule(tetris);
+
     return [solver, grid];
 }
 

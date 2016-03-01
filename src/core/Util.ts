@@ -8,12 +8,22 @@ export function assert(thing: any, format: string = null, ...args: any[]) {
     throw new Error(message);
 }
 
-export function cloneArray<T>(a: T[]) {
+export function cloneArray<T>(a: T[]) : T[] {
     var newArr = new Array<T>(a.length);
     var i = a.length;
     while(i--) newArr[i] = a[i];
 
     return newArr;
+}
+
+export function clonePairArray<T>(a: Pair<T>[]) {
+    const cloned = cloneArray(a);
+
+    for(let i = 0; i < cloned.length; i++) {
+        cloned[i] = [cloned[i][0], cloned[i][1]];
+    }
+
+    return cloned;
 }
 
 export function clonePush<T>(arr: T[], next: T) {
@@ -41,3 +51,5 @@ export function notPresent<T>(haystack: T[], needles: T[]) {
 export function last<T>(a: T[]) {
     return a[a.length-1];
 }
+
+export type Pair<T> = [T, T];

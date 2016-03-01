@@ -26,6 +26,7 @@ export class GridSolver {
 
     AddRule(rule: Rule) {
         this.rules.push(rule);
+        rule.SetSolver(this);
         return this;
     }
 

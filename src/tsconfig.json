@@ -18,8 +18,11 @@
     "core/rules/Rule.ts",
     "core/rules/RequiredVisit.ts",
     "core/rules/CellCategory.ts",
+    "core/rules/TetrisRule.ts",
     "visualization/index.ts",
     "visualization/GridRenderer.tsx",
+    "visualization/Rules.tsx",
+    "visualization/Solution.tsx",
     "../typings/main.d.ts"
   ]
 }
