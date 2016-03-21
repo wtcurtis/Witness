@@ -87,7 +87,8 @@ export class TetrisRule implements Rule {
         var grouped: TetrisBlock[][] = [];
 
         for(let i = 0; i < this.blocks.length; i++) {
-            const blockRegion = regionIndexes[i];
+            const block = this.blocks[i];
+            const blockRegion = regionIndexes[block.CellIndex(this.grid)];
             if(!blockRegion) continue;
 
             if(!grouped[blockRegion]) grouped[blockRegion] = [];
@@ -178,6 +179,10 @@ export class TetrisBlock {
 
     ActiveRotation() {
         return this.cells[0];
+    }
+
+    CellIndex(grid: Grid) {
+        return this.cellLocation[0] + this.cellLocation[1] * grid.CellY();
     }
 
     private static rotateRightMatrix: RotationMatrix = [[0, 1], [-1, 0]];
