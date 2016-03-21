@@ -13,6 +13,7 @@ import {CellCategory} from "../core/rules/CellCategory";
 import {RequiredVisit} from "../core/rules/RequiredVisit";
 import {GraphSolution} from "../core/Solution";
 import {TetrisRule} from "../core/rules/TetrisRule";
+import {GridRendererProps} from "./GridRenderer";
 
 const n = 6;
 
@@ -54,8 +55,12 @@ function getSolverPairs(): [GridSolver, Grid] {
     solver.AddRule(cats);
 
     const tetris = new TetrisRule(grid);
-    tetris.AddSquareBlock([0, 1]);
-    tetris.AddLBlock([2, 1]);
+    tetris.AddLineBlock([0, 1], true);
+    tetris.AddLBlockR([0, 2], true, 1);
+    //tetris.AddLBlockR([2, 1], true);
+    //tetris.AddLBlockL([3, 1], true);
+    //tetris.AddZBlockR([4, 1], true);
+    //tetris.AddZBlockL([2, 2], true);
     solver.AddRule(tetris);
 
     return [solver, grid];

@@ -65,7 +65,6 @@ export class CellCategory implements Rule {
                 if(lastCategory === -1) lastCategory = cat;
 
                 if(cat !== lastCategory) {
-                    //console.log('rejecting, category', solution);
                     return true;
                 }
             }
@@ -97,12 +96,10 @@ export class CellCategory implements Rule {
                 if(categoryCounts[cat] === void 0) categoryCounts[cat] = 0;
 
                 categoryCounts[cat] += 1;
-
-                if(categoryCounts[cat] > 2) return true;
             }
 
             const anySingles = _.some(categoryCounts, (count) => {
-                return count === 1;
+                return count % 2 === 1;
             });
 
             if(anySingles) return true;

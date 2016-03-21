@@ -185,36 +185,6 @@ class TetrisRenderer extends React.Component<TetrisProps, {}> {
             return <div className="tetrisBlock">{children}</div>;
         });
 
-        //const mainProps = this.props.mainProps;
-        //const rule = this.props.rule;
-        //const block = rule.Blocks()[0];
-        //
-        //const margin = 2;
-        //const maxX: number = _.maxBy(block.cells[0], c => c[0])[0];
-        //const maxY: number = _.maxBy(block.cells[0], c => c[1])[1];
-        //const size = mainProps.cellWidth * .15;
-        //const cellSize = (size - (margin * (Math.max(maxX, maxY) - 1)));
-        //const blockLoc = block.cellLocation;
-        //
-        //const [centerLeft, centerTop] = cellCenter(blockLoc[0], blockLoc[1], mainProps);
-        //const left = centerLeft - maxX / 2;
-        //const top = centerTop - maxY / 2;
-        //
-        //const children = block.cells[0].map((cell: Pair<number>) => {
-        //    const [x, y] = cell;
-        //
-        //    const style = {
-        //        position: 'absolute',
-        //        width: cellSize,
-        //        height: cellSize,
-        //        left: left + (x * cellSize) + margin * (x - 1),
-        //        top: top + (y * cellSize) + margin * (y - 1),
-        //        backgroundColor: this.color()
-        //    };
-        //
-        //    return <div style={style} className="tetrisCell" />
-        //}).filter(el => !!el);
-
         return <div className="tetrisGroup">
             {allBlocks}
         </div>;
@@ -235,7 +205,9 @@ class TetrisRenderer extends React.Component<TetrisProps, {}> {
         const top = centerTop - maxY / 2;
 
         const children = block.cells[0].map((cell: Pair<number>) => {
-            const [x, y] = cell;
+            let [x, y] = cell;
+
+            y = maxY - y;
 
             const style = {
                 position: 'absolute',
