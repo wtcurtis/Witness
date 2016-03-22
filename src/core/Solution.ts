@@ -84,12 +84,12 @@ export class GraphSolution extends Solution<Node<number>> {
     }
 
     private SetClosedRegions() {
-        if(this.openRegion === -1) {
+        if(this.openRegion === GraphSolution.ALL_REGIONS_OPEN) {
             this.closedRegions = [];
             return;
         }
 
-        if(this.openRegion === -2) {
+        if(this.openRegion === GraphSolution.ALL_REGIONS_CLOSED) {
             this.closedRegions = cloneArray(this.allRegions);
             return;
         }
@@ -112,26 +112,26 @@ export class GraphSolution extends Solution<Node<number>> {
         const last = this.Last();
 
         if(!last) {
-            this.openRegion = -1;
+            this.openRegion = GraphSolution.ALL_REGIONS_OPEN;
             return;
         }
 
         if(solver.IsExit(last)) {
-            this.openRegion = -2;
+            this.openRegion = GraphSolution.ALL_REGIONS_CLOSED;
             return;
         }
 
         const bounding = grid.CellsBoundingNode(last);
-        let lastRegion = -1;
+        let lastRegion = GraphSolution.ALL_REGIONS_OPEN;
         for(var i = 0; i < bounding.length; i++) {
             let cellIndex = bounding[i];
-            if(lastRegion === -1) {
+            if(lastRegion === GraphSolution.ALL_REGIONS_OPEN) {
                 lastRegion = regions[cellIndex];
                 continue;
             }
 
             if(lastRegion !== regions[cellIndex]) {
-                this.openRegion = -1;
+                this.openRegion = GraphSolution.ALL_REGIONS_OPEN;
                 return;
             }
         }
@@ -236,8 +236,8 @@ export class GraphSolution extends Solution<Node<number>> {
     }
 
     public IsClosedRegion(regionNumber: number) {
-        if(this.openRegion === -1) return false;
-        if(this.openRegion === -2) return true;
+        if(this.openRegion === GraphSolution.ALL_REGIONS_OPEN) return false;
+        if(this.openRegion === GraphSolution.ALL_REGIONS_CLOSED) return true;
 
         return this.openRegion !== regionNumber;
     }
@@ -267,8 +267,14 @@ export class GraphSolution extends Solution<Node<number>> {
     public GroupedRegions() { return this.groupedRegions; }
     public AllRegions() { return this.allRegions; }
 
+    public AllRegionsClosed() { return this.openRegion === GraphSolution.ALL_REGIONS_CLOSED; }
+    public AllRegionsOpen() { return this.openRegion === GraphSolution.ALL_REGIONS_OPEN; }
+
     public SetRawSolution(solution: GraphSolution) {
         this.solution = solution.RawSolution();
         return this;
     }
+
+    public static ALL_REGIONS_OPEN = -1;
+    public static ALL_REGIONS_CLOSED = -2;
 }

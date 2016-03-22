@@ -55,7 +55,7 @@ function getSolverPairs(): [GridSolver, Grid] {
     solver.AddRule(cats);
 
     const tetris = new TetrisRule(grid);
-    tetris.AddLineBlock([0, 1], true);
+    tetris.AddLineBlock([0, 1]);
     tetris.AddLBlockR([0, 2], true, 1);
     //tetris.AddLBlockR([2, 1], true);
     //tetris.AddLBlockL([3, 1], true);

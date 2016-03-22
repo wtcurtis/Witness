@@ -8,6 +8,7 @@ import {cloneArray} from "../Util";
 import {Pair} from "../Util";
 import {clonePairArray} from "../Util";
 import {Grid} from "../Grid";
+import {last} from "../Util";
 
 type RegionGroup = TetrisBlock[][];
 
@@ -22,10 +23,35 @@ export class TetrisRule implements Rule {
     }
 
     Reject(solution: GraphSolution): boolean {
+        if(solution.AllRegionsOpen()) return false;
+
         const groupedBlocks = this.groupByRegion(solution);
         if(this.rejectByRegionSize(solution, groupedBlocks)) return true;
 
-        return false;
+        const placements = this.AllValidPlacements(solution, groupedBlocks);
+        if(!placements.length) return true;
+
+        return this.rejectByPlacement(solution, placements);
+    }
+
+    private rejectByPlacement(solution: GraphSolution, placements: [number, [TetrisBlock, PositionTuple[]][]][]) {
+        const regions = solution.Regions();
+        const cellX = this.grid.CellX();
+        for(let i = 0; i < placements.length; i++) {
+            const [region, gPlacements] = placements[i];
+
+            for(
+                let currentPlacement = gPlacements.map((p):any => [0, 0]);
+                currentPlacement !== null;
+                currentPlacement = this.nextPlacementChoice(gPlacements, currentPlacement)
+            ) {
+                if(this.placementIsValid(currentPlacement, gPlacements, region, regions, cellX)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     rejectByRegionSize(solution: GraphSolution, groupedBlocks: RegionGroup) {
@@ -46,29 +72,90 @@ export class TetrisRule implements Rule {
         const groupedRegions = solution.GroupedRegions();
         const allRegions = solution.Regions();
 
-        const allValidPlacements: [TetrisBlock, [number, Pair<number>[][]][]][] = [];
+        const allValidPlacements: [number, [TetrisBlock, PositionTuple[]][]][] = [];
 
         for(let region = 0; region < groupedBlocks.length; region++) {
             const group = groupedBlocks[region];
             if(group === undefined) continue;
 
+            allValidPlacements.push([region, []]);//[region] = [];
+
             for(let j = 0; j < group.length; j++) {
                 const block = group[j];
+                block.regionNumber = region;
                 const byPlacement = this.getRotationsByPlacement(block, region, groupedRegions, allRegions);
 
                 if(byPlacement.length === 0) return [];
 
-                allValidPlacements.push([block, byPlacement]);
+                last(allValidPlacements)[1].push([block, byPlacement]);
             }
         }
 
         return allValidPlacements;
     }
 
+    private placementIsValid(
+        placements: Pair<number>[],
+        groupPlacements: [TetrisBlock, PositionTuple[]][],
+        regionNumber: number,
+        regions: number[],
+        cellX: number)
+    {
+        const distinct: boolean[] = [];
+        for(let i = 0; i < placements.length; i++) {
+            const [posIndex, rotIndex] = placements[i];
+            const posReference = groupPlacements[i][1][posIndex];
+            const rotation = posReference[1][rotIndex];
+            const position = posReference[0];
+
+            for(let j = 0; j < rotation.length; j++) {
+                const rotPosition = rotation[j];
+                const cIndex = position + rotPosition[0] + rotPosition[1] * cellX;
+
+                if(regions[cIndex] !== regionNumber) return false;
+                if(distinct[cIndex]) return false;
+
+                distinct[cIndex] = true;
+            }
+        }
+
+        return true;
+    }
+
+    private nextPlacementChoice(placements: [TetrisBlock, PositionTuple[]][], currentPlacement: Pair<number>[] = null) {
+        if(!currentPlacement) {
+            currentPlacement = placements.map(p => <Pair<number>>[0, 0]);
+        }
+
+        for(var i = currentPlacement.length - 1; i >= 0; i--) {
+            let updated = false;
+            const [position, rotation] = currentPlacement[i];
+            const posReference = placements[i][1][position];
+            if(rotation < posReference[1].length - 1) {
+                currentPlacement[i][1]++;
+                updated = true;
+            } else if(position < placements[i][1].length - 1) {
+                currentPlacement[i][0]++;
+                currentPlacement[i][1] = 0;
+                updated = true;
+            }
+
+            if(updated) {
+                for(let j = i+1; j < currentPlacement.length; j++) {
+                    currentPlacement[j] = [0, 0];
+                }
+
+                return currentPlacement;
+            }
+        }
+
+        return null;
+    }
+
     private getRotationsByPlacement(block: TetrisBlock, regionNumber: number, groupedRegions: number[][], regions: number[]) {
         const region = groupedRegions[regionNumber];
 
-        const allRotations: [number, Pair<number>[][]][] = [];
+        const allRotations: PositionTuple[] = [];
         for(let i = 0; i < region.length; i++) {
             const cIndex = region[i];
             const validRotations = this.ValidRotationsAt(block, cIndex, regionNumber, regions);
@@ -82,7 +169,7 @@ export class TetrisRule implements Rule {
         this.solver = solver;
     }
 
-    AddBlock(cells: Pair<number>[], location: Pair<number>, rotatable: boolean = false, rightRotations: number = 0) {
+    AddBlock(cells: PairArray<number>, location: Pair<number>, rotatable: boolean = false, rightRotations: number = 0) {
         const rotated = TetrisBlock.rotateRight(cells, rightRotations);
         const block= new TetrisBlock(
             [rotated],
@@ -99,7 +186,7 @@ export class TetrisRule implements Rule {
     }
 
     AddLBlockR(location: Pair<number>,  rotatable: boolean = false, rightRotations: number = 0) {
-        const cells: Pair<number>[] = TetrisBlock.mirrorHorz(TetrisBlock.LBlockCells());
+        const cells: PairArray<number> = TetrisBlock.mirrorHorz(TetrisBlock.LBlockCells());
 
         return this.AddBlock(cells, location, rotatable, rightRotations);
     }
@@ -109,7 +196,7 @@ export class TetrisRule implements Rule {
     }
 
     AddZBlockR(location: Pair<number>,  rotatable: boolean = false, rightRotations: number = 0) {
-        const cells: Pair<number>[] = TetrisBlock.mirrorHorz(TetrisBlock.ZBlockCells());
+        const cells: PairArray<number> = TetrisBlock.mirrorHorz(TetrisBlock.ZBlockCells());
 
         return this.AddBlock(cells, location, rotatable, rightRotations);
     }
@@ -154,13 +241,16 @@ export class TetrisRule implements Rule {
 }
 
 type RotationMatrix = Pair<Pair<number>>;
+type PairArray<T> = Pair<T>[];
+type PositionTuple = [number, PairArray<number>[]];
 
 export class TetrisBlock {
-    cells: Pair<number>[][];
+    cells: PairArray<number>[];
     cellLocation: Pair<number>;
     rotatable: boolean;
+    regionNumber: number;
 
-    constructor(cells: Pair<number>[][], location: Pair<number>, rotatable: boolean) {
+    constructor(cells: PairArray<number>[], location: Pair<number>, rotatable: boolean) {
         this.cells = cells;
         this.cellLocation = location;
         this.rotatable = rotatable;
@@ -169,7 +259,7 @@ export class TetrisBlock {
             cells[0] = TetrisBlock.normalizeCells(cells[0]);
 
             if(rotatable) {
-                var rotated: Pair<number>[];
+                var rotated: PairArray<number>;
                 let last = cells[0];
                 for(let i = 0; i < 3; i++) {
                     rotated = TetrisBlock.rotate(last, TetrisBlock.rotateRightMatrix, 1);
@@ -184,7 +274,7 @@ export class TetrisBlock {
         }
     }
 
-    normalizedCellListEqual(first: Pair<number>[], second: Pair<number>[]) {
+    normalizedCellListEqual(first: PairArray<number>, second: PairArray<number>) {
         if(first.length !== second.length) return false;
         if(!first.length) return false;
 
@@ -204,7 +294,7 @@ export class TetrisBlock {
         );
     }
 
-    static normalizeCells(cells: Pair<number>[]) {
+    static normalizeCells(cells: PairArray<number>) {
         const sorted = _.sortBy(cells, [
             (c: Pair<number>) => -c[0],
             (c: Pair<number>) => -c[1]
@@ -221,18 +311,18 @@ export class TetrisBlock {
         return sorted;
     }
 
-    static mirrorHorz(cells: Pair<number>[]): Pair<number>[] {
+    static mirrorHorz(cells: PairArray<number>): PairArray<number> {
         const maxX: number = _.maxBy(cells, c => c[0])[0];
 
         return TetrisBlock.normalizeCells(cells.map(c => <Pair<number>>[maxX - c[0], c[1]]));
     }
 
-    static rotateRight(cells: Pair<number>[], count: number = 1) {
+    static rotateRight(cells: PairArray<number>, count: number = 1) {
         return TetrisBlock.rotate(cells, TetrisBlock.rotateRightMatrix, count);
     }
 
-    static rotate(cells: Pair<number>[], matrix: RotationMatrix, count: number = 1, clone = true)
-        : Pair<number>[]
+    static rotate(cells: PairArray<number>, matrix: RotationMatrix, count: number = 1, clone = true)
+        : PairArray<number>
     {
         const newCells = clone
             ? clonePairArray(cells)
@@ -265,7 +355,7 @@ export class TetrisBlock {
 
     // These are all static functions, since arrays are passed by reference friggin
     // everywhere. New instance each call.
-    static LBlockCells(): Pair<number>[] {
+    static LBlockCells(): PairArray<number> {
         return [
             [0, 0],
             [1, 0],
@@ -274,7 +364,7 @@ export class TetrisBlock {
         ]
     }
 
-    static SquareBlockCells(): Pair<number>[] {
+    static SquareBlockCells(): PairArray<number> {
         return [
             [0, 0],
             [0, 1],
@@ -283,7 +373,7 @@ export class TetrisBlock {
         ];
     }
 
-    static ZBlockCells(): Pair<number>[] {
+    static ZBlockCells(): PairArray<number> {
         return [
             [0, 0],
             [1, 0],
@@ -292,7 +382,7 @@ export class TetrisBlock {
         ];
     }
 
-    static LineBlockCells(): Pair<number>[] {
+    static LineBlockCells(): PairArray<number> {
         return [
             [0, 0],
             [0, 1],
