@@ -20,6 +20,8 @@ export class RequiredVisit implements Rule {
     }
 
     public AddNodeVisit(nodeIndex: number) {
+        if(!this.grid.Graph().NodeIsConnected(nodeIndex)) return this;
+
         this.visits.push([nodeIndex]);
         return this;
     }

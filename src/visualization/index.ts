@@ -14,26 +14,12 @@ import {RequiredVisit} from "../core/rules/RequiredVisit";
 import {GraphSolution} from "../core/Solution";
 import {TetrisRule} from "../core/rules/TetrisRule";
 import {GridRendererProps} from "./GridRenderer";
+import {Pair} from "../core/Util";
+import {cloneArray} from "../core/Util";
 
-const n = 6;
-
-
-//var region = grid.DetermineAllRegions([18, 19, 20, 14, 8, 2].map(n => grid.Graph().NodeAt(n))); console.log(region);
-//
-//var region = grid.DetermineAllRegions([6, 7, 1, 2, 3, 4, 10, 11].map(n => grid.Graph().NodeAt(n)));
-//console.log(region);
-
-//grid.Graph().DeleteNodeAt(0);
-
-//grid.DeleteNode(0)
-//    .DeleteNode(9)
-//    .DeleteNode(99)
-//    .DeleteNode(90);
-
-const [solver, grid] = getSolverPairs();
+const [solver, grid] = getSwampGreen2();
 window[<any>'rendered'] = <any>ReactDom.render(React.createElement(HtmlGridRenderer, {
     grid: grid,
-    //solution: [0, 1, 7, 13, 19, 25, 31, 32, 26, 20, 14, 8, 2, 3, 4, 5, 11, 10, 16, 17, 23, 22, 28, 29].map(n => grid.Graph().NodeAt(n)),
     solution: new GraphSolution([grid.Graph().NodeAt(solver.StartNodes()[0])]),
     solver: solver,
     cellWidth: 80,
@@ -55,13 +41,181 @@ function getSolverPairs(): [GridSolver, Grid] {
     solver.AddRule(cats);
 
     const tetris = new TetrisRule(grid);
-    tetris.AddLineBlock([0, 1]);
+    tetris.AddLineBlock([0, 1], true);
     tetris.AddLBlockR([0, 2], true, 1);
     //tetris.AddLBlockR([2, 1], true);
     //tetris.AddLBlockL([3, 1], true);
-    //tetris.AddZBlockR([4, 1], true);
+    tetris.AddZBlockR([3, 1], true);
     //tetris.AddZBlockL([2, 2], true);
     solver.AddRule(tetris);
+
+    return [solver, grid];
+}
+
+function getTown1(): [GridSolver, Grid] {
+    const grid = new Grid(6, 6);
+    const solver = new GridSolver(grid, [0], [35], true);
+    const cats = new CellCategory(grid);
+
+    const [maxX, maxY] = [grid.CellX() - 1, grid.CellY() - 1];
+
+    const pairs:Pair<number>[] = [[0, 0], [1, 0], [2, 0], [3, 0], [4, 0], [2, 2]];
+    pairs.forEach(p => cats.AddPairCategoryAt(1, p[0], p[1]));
+
+    solver.AddRule(cats);
+
+    const tetris = new TetrisRule(grid);
+    const tPairs:Pair<number>[] = [[0, 4], [1, 4], [2, 4], [3, 4], [4, 4]];
+
+    tPairs.forEach(p => tetris.AddSmallLBlock(p, true));
+    solver.AddRule(tetris);
+
+    return [solver, grid];
+}
+
+function getTownAll1(): [GridSolver, Grid] {
+    const grid = new Grid(5, 5);
+    const solver = new GridSolver(grid, [0], [24], true);
+
+    const tetris = new TetrisRule(grid);
+    tetris.AddTBlock([0, 1], true);
+    solver.AddRule(tetris);
+
+    const visit = new RequiredVisit(grid);
+    for(var i = 0; i < 25; i++) {
+        visit.AddNodeVisit(i);
+    }
+
+    solver.AddRule(visit);
+
+    return [solver, grid];
+}
+
+function getTownAll2(): [GridSolver, Grid] {
+    const grid = new Grid(5, 5);
+    const solver = new GridSolver(grid, [0], [24], true);
+
+    const tetris = new TetrisRule(grid);
+    tetris.AddTBlock([0, 1], true);
+    tetris.AddBlock([[0, 0]], [1, 1]);
+    solver.AddRule(tetris);
+
+    const visit = new RequiredVisit(grid);
+    for(var i = 0; i < 25; i++) {
+        visit.AddNodeVisit(i);
+    }
+
+    solver.AddRule(visit);
+
+    return [solver, grid];
+}
+
+function getTownAll3(): [GridSolver, Grid] {
+    const grid = new Grid(5, 5);
+    const solver = new GridSolver(grid, [0], [24], true);
+
+    const tetris = new TetrisRule(grid);
+    tetris.AddTBlock([0, 1], true);
+    tetris.AddBlock([[0, 0]], [1, 1]);
+    tetris.AddBlock([[0, 0]], [1, 0]);
+    solver.AddRule(tetris);
+
+    const visit = new RequiredVisit(grid);
+    for(var i = 0; i < 25; i++) {
+        visit.AddNodeVisit(i);
+    }
+
+    solver.AddRule(visit);
+
+    return [solver, grid];
+}
+
+function getTownAll4(): [GridSolver, Grid] {
+    const grid = new Grid(5, 5);
+    const solver = new GridSolver(grid, [0], [24], true);
+
+    const tetris = new TetrisRule(grid);
+    tetris.AddTBlock([0, 1], true);
+    tetris.AddTBlock([1, 1], true);
+    solver.AddRule(tetris);
+
+    const visit = new RequiredVisit(grid);
+    for(var i = 0; i < 25; i++) {
+        visit.AddNodeVisit(i);
+    }
+
+    solver.AddRule(visit);
+
+    return [solver, grid];
+}
+
+function getTownAll5(): [GridSolver, Grid] {
+    const grid = new Grid(5, 5);
+    const solver = new GridSolver(grid, [0], [24], true);
+
+    const tetris = new TetrisRule(grid);
+    const cells: Pair<number>[] = [[0, 0], [0, 1], [0, 2]];
+    tetris.AddBlock(cloneArray(cells), [0, 2], true);
+    tetris.AddBlock(cloneArray(cells), [3, 2], true);
+    solver.AddRule(tetris);
+
+    const visit = new RequiredVisit(grid);
+    for(var i = 0; i < 25; i++) {
+        visit.AddNodeVisit(i);
+    }
+
+    solver.AddRule(visit);
+
+    return [solver, grid];
+}
+
+function getSwampGreen1(): [GridSolver, Grid] {
+    const grid = new Grid(6, 6);
+    const solver = new GridSolver(grid, [2], [32], true);
+
+    const tetris = new TetrisRule(grid);
+
+    tetris.AddLBlockR([1, 1], true);
+    tetris.AddLBlockL([3, 2], true);
+    tetris.AddBlock([[0, 0], [0, 1]], [3, 0]);
+    solver.AddRule(tetris);
+
+    const cats = new CellCategory(grid);
+
+    cats.AddPairCategoryAt(1, 0, 3);
+    cats.AddPairCategoryAt(2, 1, 4);
+    cats.AddPairCategoryAt(1, 4, 0);
+    cats.AddPairCategoryAt(2, 4, 2);
+
+    solver.AddRule(cats);
+
+    return [solver, grid];
+}
+
+function getSwampGreen2(): [GridSolver, Grid] {
+    const grid = new Grid(6, 6);
+    const solver = new GridSolver(grid, [2], [32], true);
+
+    const tetris = new TetrisRule(grid);
+
+    tetris.AddBlock([
+        [0, 0], [1, 0], [2, 0],
+        [0, 1], [1, 1], [2, 1],
+        [0, 2], [2, 2],
+        [0, 3], [2, 3],
+    ], [2, 2], true);
+    solver.AddRule(tetris);
+
+    const cats = new CellCategory(grid);
+
+    cats.AddPairCategoryAt(1, 0, 2);
+    cats.AddPairCategoryAt(1, 1, 2);
+    cats.AddPairCategoryAt(1, 3, 2);
+    cats.AddPairCategoryAt(1, 4, 2);
+    cats.AddPairCategoryAt(1, 2, 3);
+    cats.AddPairCategoryAt(1, 2, 4);
+
+    solver.AddRule(cats);
 
     return [solver, grid];
 }

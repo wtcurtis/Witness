@@ -24,9 +24,21 @@ export class TetrisRule implements Rule {
 
     Reject(solution: GraphSolution): boolean {
         if(solution.AllRegionsOpen()) return false;
+        if(solution.ClosedRegions().length === 0) return false;
 
         const groupedBlocks = this.groupByRegion(solution);
         if(this.rejectByRegionSize(solution, groupedBlocks)) return true;
+
+        let anyClosed: boolean = false;
+        for(var group = 0; group < groupedBlocks.length; group++) {
+            if(groupedBlocks[group] === undefined) continue;
+            if(solution.IsClosedRegion(group)) {
+                anyClosed = true;
+                break;
+            }
+        }
+
+        if(!anyClosed) return false;
 
         const placements = this.AllValidPlacements(solution, groupedBlocks);
         if(!placements.length) return true;
@@ -71,12 +83,14 @@ export class TetrisRule implements Rule {
     AllValidPlacements(solution: GraphSolution, groupedBlocks: RegionGroup) {
         const groupedRegions = solution.GroupedRegions();
         const allRegions = solution.Regions();
+        const closed = solution.ClosedRegions();
 
         const allValidPlacements: [number, [TetrisBlock, PositionTuple[]][]][] = [];
 
         for(let region = 0; region < groupedBlocks.length; region++) {
             const group = groupedBlocks[region];
             if(group === undefined) continue;
+            if(closed.indexOf(region) === -1) continue;
 
             allValidPlacements.push([region, []]);//[region] = [];
 
@@ -107,10 +121,14 @@ export class TetrisRule implements Rule {
             const posReference = groupPlacements[i][1][posIndex];
             const rotation = posReference[1][rotIndex];
             const position = posReference[0];
+            const pX = position % cellX;
+            const pY = Math.floor(position / cellX);
 
             for(let j = 0; j < rotation.length; j++) {
                 const rotPosition = rotation[j];
                 const cIndex = position + rotPosition[0] + rotPosition[1] * cellX;
+
+                if(!this.grid.CellExists(pX + rotPosition[0], pY + rotPosition[1])) return false;
 
                 if(regions[cIndex] !== regionNumber) return false;
                 if(distinct[cIndex]) return false;
@@ -207,6 +225,15 @@ export class TetrisRule implements Rule {
 
     AddLineBlock(location: Pair<number>, rotatable: boolean = false, rightRotations: number = 0) {
         return this.AddBlock(TetrisBlock.LineBlockCells(), location, rotatable, rightRotations);
+    }
+
+    AddSmallLBlock(location: Pair<number>, rotatable: boolean = false, rightRotations: number = 0) {
+        const cells: Pair<number>[] = [[0, 0], [0, 1], [1, 0]];
+        return this.AddBlock(cells, location, rotatable, rightRotations);
+    }
+
+    AddTBlock(location: Pair<number>, rotatable: boolean = false, rightRotations: number = 0) {
+        return this.AddBlock(TetrisBlock.TBlockCells(), location, rotatable, rightRotations);
     }
 
     private groupByRegion(solution: GraphSolution) {
@@ -388,6 +415,15 @@ export class TetrisBlock {
             [0, 1],
             [0, 2],
             [0, 3]
+        ];
+    }
+
+    static TBlockCells(): PairArray<number> {
+        return [
+            [0, 0],
+            [1, 0],
+            [2, 0],
+            [1, 1]
         ];
     }
 }

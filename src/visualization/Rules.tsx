@@ -215,8 +215,11 @@ class TetrisRenderer extends React.Component<TetrisProps, {}> {
                 height: cellSize,
                 left: left + (x * cellSize) + margin * (x - 1),
                 top: top + (y * cellSize) + margin * (y - 1),
-                backgroundColor: this.color()
+                backgroundColor: this.color(),
+                transform: ''
             };
+
+            if(block.rotatable) style.transform = 'rotate(45deg)';
 
             return <div style={style} className="tetrisCell" />
         }).filter(el => !!el);
