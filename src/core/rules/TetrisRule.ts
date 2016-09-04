@@ -9,6 +9,7 @@ import {Pair} from "../Util";
 import {clonePairArray} from "../Util";
 import {Grid} from "../Grid";
 import {last} from "../Util";
+import _ = require('lodash');
 
 type RegionGroup = TetrisBlock[][];
 

@@ -9,6 +9,7 @@ import {TetrisRule} from "../core/rules/TetrisRule";
 import {cellCenter} from "./GridRenderer";
 import {Pair} from "../core/Util";
 import {TetrisBlock} from "../core/rules/TetrisRule";
+import _ = require('lodash');
 
 export interface RuleProps {
     mainProps: GridRendererProps

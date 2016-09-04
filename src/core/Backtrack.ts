@@ -20,6 +20,10 @@ export function Backtrack<T>(
     const bt = function(s: Solution<T>) {
         totalInBt++;
 
+        if(totalInBt % 100000 === 0) {
+            console.log("In backtrack for " + totalInBt);
+        }
+
         if(reject(s)) return false;
         if(accept(s)) {
             output(s);

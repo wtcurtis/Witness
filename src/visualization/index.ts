@@ -17,7 +17,7 @@ import {GridRendererProps} from "./GridRenderer";
 import {Pair} from "../core/Util";
 import {cloneArray} from "../core/Util";
 
-const [solver, grid] = getSwampGreen2();
+const [solver, grid] = getTownAll5();
 window[<any>'rendered'] = <any>ReactDom.render(React.createElement(HtmlGridRenderer, {
     grid: grid,
     solution: new GraphSolution([grid.Graph().NodeAt(solver.StartNodes()[0])]),

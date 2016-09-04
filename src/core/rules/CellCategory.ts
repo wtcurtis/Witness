@@ -6,6 +6,7 @@ import {Grid} from "../Grid";
 import {GraphSolution} from "../Solution";
 import {GridSolver} from "../GridSolver";
 import {Rule} from "./Rule";
+import _ = require('lodash');
 
 /**
  * This is the square color cell sections (where each region must contain at most one color)

@@ -17,6 +17,7 @@ import {RequiredVisit} from "../core/rules/RequiredVisit";
 import {Rules} from "./Rules";
 import {Solution, SolutionProps} from "./Solution";
 import {Pair} from "../core/Util";
+import _ = require('lodash');
 
 export interface GridRendererProps {
     grid: Grid,
